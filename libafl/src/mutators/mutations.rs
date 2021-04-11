@@ -15,6 +15,7 @@ use core::{
     cmp::{max, min},
     marker::PhantomData,
 };
+use std::convert::TryInto;
 
 /// Mem move in the own vec
 #[inline]
@@ -543,7 +544,7 @@ where
             Ok(MutationResult::Skipped)
         } else {
             let idx = state.rand_mut().below(input.bytes().len() as u64 - 1) as usize;
-            unsafe {
+            /*unsafe {
                 // Moar speed, no bound check
                 let ptr = input.bytes_mut().get_unchecked_mut(idx) as *mut _ as *mut u16;
                 let num = 1 + state.rand_mut().below(ARITH_MAX) as u16;
@@ -553,7 +554,17 @@ where
                     2 => *ptr = ((*ptr).swap_bytes().wrapping_add(num)).swap_bytes(),
                     _ => *ptr = ((*ptr).swap_bytes().wrapping_sub(num)).swap_bytes(),
                 };
-            }
+            }*/
+            let bytes = input.bytes_mut();
+            let val = u16::from_be_bytes(bytes[idx..].try_into().unwrap());
+            let num = 1 + state.rand_mut().below(ARITH_MAX) as u16;
+            let mut new_bytes = match state.rand_mut().below(4) {
+                0 => val.wrapping_add(num).to_be_bytes(),
+                1 => val.wrapping_sub(num).to_be_bytes(),
+                2 => val.wrapping_add(num).to_le_bytes(),
+                _ => val.wrapping_sub(num).to_le_bytes(),
+            };
+            new_bytes.swap_with_slice(&mut bytes[idx..]);
             Ok(MutationResult::Mutated)
         }
     }
