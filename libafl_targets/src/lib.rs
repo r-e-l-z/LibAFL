@@ -10,8 +10,8 @@ pub mod libfuzzer;
 #[cfg(feature = "libfuzzer")]
 pub use libfuzzer::*;
 
-#[cfg(all(feature = "value_profile", feature = "cmplog"))]
-compile_error!("the libafl_targets `value_profile` and `cmplog` features are mutually exclusive.");
+// #[cfg(all(feature = "value_profile", feature = "cmplog"))]
+// compile_error!("the libafl_targets `value_profile` and `cmplog` features are mutually exclusive.");
 
 #[cfg(feature = "value_profile")]
 pub mod value_profile;
