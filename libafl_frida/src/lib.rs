@@ -1,4 +1,5 @@
 pub mod asan_rt;
+pub mod cmplog_rt;
 pub mod helper;
 
 /// A representation of the various Frida options
@@ -11,6 +12,7 @@ pub struct FridaOptions {
     enable_asan_allocation_backtraces: bool,
     enable_coverage: bool,
     enable_drcov: bool,
+    enable_cmplog: bool,
 }
 
 impl FridaOptions {
@@ -55,6 +57,9 @@ impl FridaOptions {
                             );
                         }
                     }
+                    "cmplog" => {
+                        options.enable_cmplog = value.parse().unwrap();
+                    }
                     _ => {
                         panic!("unknown FRIDA option: '{}'", option);
                     }
@@ -81,6 +86,12 @@ impl FridaOptions {
     #[inline]
     pub fn drcov_enabled(self) -> bool {
         self.enable_drcov
+    }
+
+    /// Is CmpLog enabled?
+    #[inline]
+    pub fn cmplog_enabled(&self) -> bool {
+        self.enable_cmplog
     }
 
     /// Should ASAN detect leaks
@@ -118,6 +129,7 @@ impl Default for FridaOptions {
             enable_asan_allocation_backtraces: true,
             enable_coverage: true,
             enable_drcov: false,
+            enable_cmplog: true,
         }
     }
 }
